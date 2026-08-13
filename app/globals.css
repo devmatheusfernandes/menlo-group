@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Brand palette */
+  --color-navy-900: #0e2438;
+  --color-navy-800: #123249;
+  --color-navy-700: #164869;
+  --color-navy-600: #1d5a82;
+
+  --color-gold-500: #f5b914;
+  --color-gold-600: #d89a00;
+  --color-gold-100: #fdf0c8;
+
+  --color-cream-50: #fbf8f2;
+  --color-cream-100: #f4eddd;
+  --color-cream-200: #eae0c8;
+
+  --color-ink: #1b2a35;
+  --color-muted: #5c6b76;
+  --color-faint: #93a2ac;
+  --color-line: #dcd3bc;
+
+  /* Typography */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* Elevation */
+  --shadow-soft: 0 20px 50px -25px rgb(14 36 56 / 0.35);
+  --shadow-card: 0 12px 30px -18px rgb(14 36 56 / 0.28);
+  --shadow-collage: 0 30px 60px -22px rgb(4 13 22 / 0.65);
+
+  /* Radii */
+  --radius-panel: 22px;
+  --radius-card: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Offset anchor scrolling for the fixed header */
+    scroll-padding-top: 96px;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-cream-50);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    color: var(--color-navy-900);
+  }
+
+  ::selection {
+    background-color: var(--color-gold-500);
+    color: var(--color-navy-900);
+  }
+
+  :focus-visible {
+    outline: 2.5px solid var(--color-gold-600);
+    outline-offset: 3px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
