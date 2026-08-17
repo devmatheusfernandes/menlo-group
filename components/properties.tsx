@@ -3,17 +3,21 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { InfoIcon, SearchIcon } from "@/components/icons";
+import { ArrowRight, InfoIcon, SearchIcon } from "@/components/icons";
 import { NdaModal } from "@/components/nda-modal";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Reveal } from "@/components/ui/reveal";
 import { filters, listings, type Division, type Listing } from "@/lib/listings";
 import { sectionHeading, wrap } from "@/lib/styles";
 
+/** One full row of cards at the widest breakpoint. */
+const PAGE_SIZE = 3;
+
 export function Properties() {
   const [activeFilter, setActiveFilter] = useState<Division | "all">("all");
   const [query, setQuery] = useState("");
   const [activeListing, setActiveListing] = useState<Listing | null>(null);
+  const [page, setPage] = useState(0);
   const reduceMotion = useReducedMotion();
 
   const visible = useMemo(() => {
@@ -26,6 +30,16 @@ export function Properties() {
       return matchesFilter && (!q || haystack.includes(q));
     });
   }, [activeFilter, query]);
+
+  const pageCount = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+  // Filtering can shrink the set under the current page — clamp instead of
+  // showing an empty grid until the next render.
+  const current = Math.min(page, pageCount - 1);
+  const start = current * PAGE_SIZE;
+  const paged = visible.slice(start, start + PAGE_SIZE);
+
+  /** Wraps around, so the arrows never dead-end on a short result set. */
+  const goTo = (next: number) => setPage((next + pageCount) % pageCount);
 
   return (
     <section id="properties" className="scroll-mt-24 bg-cream-100 py-24">
@@ -64,7 +78,10 @@ export function Properties() {
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  onClick={() => setActiveFilter(filter.value)}
+                  onClick={() => {
+                    setActiveFilter(filter.value);
+                    setPage(0);
+                  }}
                   className={`relative rounded-full px-4.5 py-2.5 text-[0.85rem] font-semibold transition-colors ${
                     isActive ? "text-white" : "text-muted hover:text-navy-800"
                   }`}
@@ -91,7 +108,10 @@ export function Properties() {
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(0);
+              }}
               placeholder="Search by city, type or keyword…"
               aria-label="Search listings"
               className="w-full border-none bg-transparent text-[0.92rem] outline-none"
@@ -99,31 +119,150 @@ export function Properties() {
           </div>
         </Reveal>
 
-        <motion.div
-          layout={!reduceMotion}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          <AnimatePresence mode="popLayout">
-            {visible.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                reduceMotion={!!reduceMotion}
-                onOpen={() => setActiveListing(listing)}
-              />
-            ))}
+        {/* The whole row swaps as one layer. The outgoing copy is pulled out of
+            flow while it fades, so nothing reflows mid-transition. */}
+        <div className="relative">
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={`${activeFilter}|${query}|${current}`}
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: reduceMotion ? 0 : 0.07 },
+                },
+              }}
+              initial="hidden"
+              animate="show"
+              exit={{
+                opacity: 0,
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                transition: { duration: 0.22, ease: "easeOut" },
+              }}
+            >
+              {paged.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  reduceMotion={!!reduceMotion}
+                  onOpen={() => setActiveListing(listing)}
+                />
+              ))}
+            </motion.div>
           </AnimatePresence>
-        </motion.div>
+        </div>
 
-        {visible.length === 0 && (
+        {visible.length === 0 ? (
           <p className="py-15 text-center text-muted">
             No results found — try another term or clear your filters.
           </p>
+        ) : (
+          <Pagination
+            page={current}
+            pageCount={pageCount}
+            from={start + 1}
+            to={start + paged.length}
+            total={visible.length}
+            reduceMotion={!!reduceMotion}
+            onGoTo={goTo}
+          />
         )}
       </div>
 
       <NdaModal listing={activeListing} onClose={() => setActiveListing(null)} />
     </section>
+  );
+}
+
+/** Mono page counter, numbered steps and wrap-around arrows. */
+function Pagination({
+  page,
+  pageCount,
+  from,
+  to,
+  total,
+  reduceMotion,
+  onGoTo,
+}: {
+  page: number;
+  pageCount: number;
+  from: number;
+  to: number;
+  total: number;
+  reduceMotion: boolean;
+  onGoTo: (page: number) => void;
+}) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const arrow =
+    "flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white text-navy-900 transition-colors hover:border-navy-900 hover:bg-navy-900 hover:text-white disabled:pointer-events-none disabled:opacity-40";
+
+  return (
+    <div className="mt-10 flex flex-wrap items-center justify-between gap-5 border-t border-line pt-6">
+      <p
+        aria-live="polite"
+        className="font-mono text-[0.72rem] tracking-[0.14em] text-muted uppercase"
+      >
+        Showing {pad(from)}–{pad(to)}{" "}
+        <span className="text-faint">of {pad(total)} listings</span>
+      </p>
+
+      {pageCount > 1 && (
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onGoTo(page - 1)}
+            aria-label="Previous page"
+            className={arrow}
+          >
+            <ArrowRight className="h-4 w-4 rotate-180" />
+          </button>
+
+          <div className="flex items-center gap-1.5">
+            {Array.from({ length: pageCount }, (_, i) => {
+              const isActive = i === page;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => onGoTo(i)}
+                  aria-label={`Page ${i + 1}`}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`relative rounded-full px-3 py-1.5 font-mono text-[0.74rem] font-semibold transition-colors ${
+                    isActive ? "text-white" : "text-muted hover:text-navy-800"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="page-pill"
+                      className="absolute inset-0 rounded-full bg-navy-900"
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { type: "spring", stiffness: 420, damping: 36 }
+                      }
+                    />
+                  )}
+                  <span className="relative z-[1]">{pad(i + 1)}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onGoTo(page + 1)}
+            aria-label="Next page"
+            className={arrow}
+          >
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -138,11 +277,15 @@ function ListingCard({
 }) {
   return (
     <motion.article
-      layout={!reduceMotion}
-      initial={{ opacity: 0, y: reduceMotion ? 0 : 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.96 }}
-      transition={{ duration: 0.5, ease: [0.22, 0.68, 0.2, 1] }}
+      // Staggered by the row that owns it; exiting is handled by that row.
+      variants={{
+        hidden: { opacity: 0, y: reduceMotion ? 0 : 14 },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.45, ease: [0.22, 0.68, 0.2, 1] },
+        },
+      }}
       className="flex flex-col overflow-hidden rounded-card border border-line bg-white shadow-card"
     >
       <div className="relative flex h-[170px] items-end p-3.5">
