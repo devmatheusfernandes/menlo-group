@@ -25,3 +25,15 @@ export const fieldLabel = "text-[0.8rem] font-semibold text-navy-800";
 
 export const sectionHeading =
   "text-[clamp(1.9rem,3.4vw,2.6rem)] font-semibold text-navy-900";
+
+export const sectionEyebrowHeading =
+  "text-[clamp(1.7rem,3vw,2.3rem)] font-semibold text-navy-900";
+
+export const card =
+  "rounded-card border border-line bg-white shadow-card";
+
+export const chip =
+  "rounded-md bg-cream-100 px-2.5 py-1 font-mono text-[0.74rem] text-navy-700";
+
+export const tag =
+  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-[5px] font-mono text-[0.66rem] font-semibold tracking-[0.06em] uppercase";

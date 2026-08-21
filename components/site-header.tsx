@@ -1,26 +1,18 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LogoMark } from "@/components/icons";
+import { NAV_LINKS, PHONE } from "@/lib/nav";
 import { btnGold, btnSm, wrap } from "@/lib/styles";
-
-const NAV_LINKS = [
-  { href: "#divisions", label: "Divisions" },
-  { href: "#real-estate", label: "Real Estate" },
-  { href: "#dental", label: "Dental Transitions" },
-  { href: "#brokerage", label: "Business Brokerage" },
-  { href: "#properties", label: "Properties & Listings" },
-  { href: "#about", label: "About" },
-];
-
-const SECTION_IDS = NAV_LINKS.map((link) => link.href.slice(1));
 
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const pathname = usePathname();
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -30,33 +22,21 @@ export function SiteHeader() {
     return () => document.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) setActiveId(entry.target.id);
-        });
-      },
-      { rootMargin: "-45% 0px -50% 0px" },
-    );
+  /** A route link is active on its own page and on anything nested under it. */
+  const isActive = (href: string) =>
+    !href.startsWith("/#") &&
+    (pathname === href || pathname.startsWith(`${href}/`));
 
-    SECTION_IDS.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Hover wins over the scroll position, matching the original interaction.
-  const highlightedId = hoveredId ?? activeId;
+  // Hover wins over the current route, matching the original interaction.
+  const highlighted =
+    hovered ?? NAV_LINKS.find((link) => isActive(link.href))?.href ?? null;
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-[500] border-b backdrop-blur-[14px] backdrop-saturate-150 transition-[background-color,box-shadow] duration-500 ${
+      className={`fixed inset-x-0 top-0 z-[500] border-b border-navy-900/8 backdrop-blur-[14px] backdrop-saturate-150 transition-[background-color,box-shadow] duration-500 ${
         scrolled
-          ? "border-navy-900/8 bg-cream-50/95 shadow-[0_8px_24px_-18px_rgba(14,36,56,0.4)]"
-          : "border-navy-900/8 bg-cream-50/70"
+          ? "bg-cream-50/95 shadow-[0_8px_24px_-18px_rgba(14,36,56,0.4)]"
+          : "bg-cream-50/70"
       }`}
     >
       <div
@@ -64,54 +44,56 @@ export function SiteHeader() {
           scrolled ? "py-2.5" : "py-4"
         }`}
       >
-        <a href="#top" className="flex shrink-0 items-center gap-2.5" aria-label="Menlo Group — home">
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-2.5"
+          aria-label="Menlo Group — home"
+        >
           <LogoMark className="h-7 w-[22px]" />
           <span className="font-display text-[1.02rem] font-normal tracking-[0.03em] text-navy-900">
             MENLO <b className="font-bold">GROUP</b>
           </span>
-        </a>
+        </Link>
 
         <nav
           className="relative ml-3 hidden flex-1 items-center gap-6 lg:flex"
           aria-label="Main navigation"
-          onMouseLeave={() => setHoveredId(null)}
+          onMouseLeave={() => setHovered(null)}
         >
-          {NAV_LINKS.map((link) => {
-            const id = link.href.slice(1);
-            return (
-              <a
-                key={link.href}
-                href={link.href}
-                onMouseEnter={() => setHoveredId(id)}
-                className="relative py-1.5 text-[0.87rem] font-semibold whitespace-nowrap text-navy-800"
-              >
-                {link.label}
-                {highlightedId === id && (
-                  <motion.span
-                    layoutId="nav-indicator"
-                    className="absolute inset-x-0 -bottom-px h-0.5 bg-gold-500"
-                    transition={
-                      reduceMotion
-                        ? { duration: 0 }
-                        : { type: "spring", stiffness: 380, damping: 34 }
-                    }
-                  />
-                )}
-              </a>
-            );
-          })}
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={isActive(link.href) ? "page" : undefined}
+              onMouseEnter={() => setHovered(link.href)}
+              className="relative py-1.5 text-[0.87rem] font-semibold whitespace-nowrap text-navy-800"
+            >
+              {link.label}
+              {highlighted === link.href && (
+                <motion.span
+                  layoutId="nav-indicator"
+                  className="absolute inset-x-0 -bottom-px h-0.5 bg-gold-500"
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : { type: "spring", stiffness: 380, damping: 34 }
+                  }
+                />
+              )}
+            </Link>
+          ))}
         </nav>
 
         <div className="hidden shrink-0 items-center gap-[18px] lg:flex">
           <a
-            href="tel:4805255362"
+            href={`tel:${PHONE.tel}`}
             className="font-mono text-[0.85rem] font-medium text-navy-800 transition-colors hover:text-gold-600"
           >
-            (480) 525-5362
+            {PHONE.label}
           </a>
-          <a href="#contact" className={`${btnGold} ${btnSm}`}>
+          <Link href="/#contact" className={`${btnGold} ${btnSm}`}>
             Talk to Menlo
-          </a>
+          </Link>
         </div>
 
         <button
@@ -152,22 +134,22 @@ export function SiteHeader() {
             transition={{ duration: 0.45, ease: [0.22, 0.68, 0.2, 1] }}
           >
             <div className="flex flex-col">
-              {[...NAV_LINKS, { href: "#contact", label: "Contact" }].map((link) => (
-                <a
+              {[{ href: "/", label: "Home" }, ...NAV_LINKS].map((link) => (
+                <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className="border-b border-navy-900/6 px-5 py-3.5 text-[0.95rem] font-semibold"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
               <a
-                href="tel:4805255362"
+                href={`tel:${PHONE.tel}`}
                 onClick={() => setMenuOpen(false)}
                 className="border-b border-navy-900/6 px-5 py-3.5 font-mono text-[0.95rem] font-semibold text-gold-600"
               >
-                (480) 525-5362
+                {PHONE.label}
               </a>
             </div>
           </motion.nav>

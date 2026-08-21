@@ -1,12 +1,6 @@
 import { Reveal } from "@/components/ui/reveal";
 import { wrap } from "@/lib/styles";
-
-const STATS = [
-  { num: "2008", label: "Founded in Tempe, AZ" },
-  { num: "03", label: "Specialized divisions, one Menlo standard" },
-  { num: "AZ → US", label: "Arizona roots, nationwide reach in Dental" },
-  { num: "100%", label: "Confidential process, first call to closing" },
-];
+import { STATS } from "@/lib/why-menlo";
 
 export function StatsBand() {
   return (

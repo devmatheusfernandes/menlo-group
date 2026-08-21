@@ -3,28 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Reveal } from "@/components/ui/reveal";
+import { PRACTICE_LIST } from "@/lib/divisions";
 import { btnGold, field, fieldLabel, wrap } from "@/lib/styles";
-
-const DIVISIONS = [
-  {
-    label: "Real Estate",
-    phone: "(480) 525-5362",
-    tel: "4805255362",
-    email: "info@menlocre.com",
-  },
-  {
-    label: "Dental Transitions",
-    phone: "(480) 267-9530",
-    tel: "4802679530",
-    email: "info@menlotransitions.com",
-  },
-  {
-    label: "Business Brokerage",
-    phone: "(480) 290-7720",
-    tel: "4802907720",
-    email: "info@menlobusinessbrokers.com",
-  },
-];
 
 const DEFAULT_HINT = "Demo only — no message is actually sent.";
 
@@ -35,7 +15,7 @@ export function Contact() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setHint(
-      'Message "sent" — in production this would reach the selected division. Thanks for reaching out!',
+      'Message "sent" — in production this would reach the selected team. Thanks for reaching out!',
     );
     setSent(true);
     e.currentTarget.reset();
@@ -43,7 +23,9 @@ export function Contact() {
 
   return (
     <section id="contact" className="scroll-mt-24 bg-navy-900 py-26">
-      <div className={`${wrap} grid items-start gap-12 lg:grid-cols-[1fr_.82fr] lg:gap-15`}>
+      <div
+        className={`${wrap} grid items-start gap-12 lg:grid-cols-[1fr_.82fr] lg:gap-15`}
+      >
         <div>
           <Reveal>
             <Eyebrow onDark>Let&apos;s talk</Eyebrow>
@@ -55,31 +37,31 @@ export function Contact() {
           </Reveal>
           <Reveal delay={0.16}>
             <p className="max-w-[480px] text-[1.06rem] text-white/70">
-              Pick the right division below and your message goes straight to
-              that team. Not sure? Just say so — we&apos;ll route it for you.
+              Pick the team below and your message goes straight to them. Not
+              sure which one? Just say so — we&apos;ll route it for you.
             </p>
           </Reveal>
 
           <Reveal delay={0.24} className="mt-8 flex flex-col gap-3.5">
-            {DIVISIONS.map((division) => (
+            {PRACTICE_LIST.map((practice) => (
               <div
-                key={division.label}
+                key={practice.id}
                 className="flex flex-wrap items-center gap-4 rounded-card border border-white/12 bg-white/5 px-5 py-4"
               >
                 <span className="basis-full font-mono text-[0.72rem] tracking-[0.05em] text-gold-500 sm:basis-[150px]">
-                  {division.label}
+                  {practice.label}
                 </span>
                 <a
-                  href={`tel:${division.tel}`}
+                  href={`tel:${practice.tel}`}
                   className="text-[0.86rem] text-white/85 transition-colors hover:text-gold-500"
                 >
-                  {division.phone}
+                  {practice.phone}
                 </a>
                 <a
-                  href={`mailto:${division.email}`}
+                  href={`mailto:${practice.email}`}
                   className="text-[0.86rem] text-white/85 transition-colors hover:text-gold-500"
                 >
-                  {division.email}
+                  {practice.email}
                 </a>
               </div>
             ))}
@@ -116,13 +98,17 @@ export function Contact() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="cDivision" className={fieldLabel}>
-                Division
+              <label htmlFor="cTeam" className={fieldLabel}>
+                Which team?
               </label>
-              <select id="cDivision" className={field} defaultValue="Real Estate">
-                <option>Real Estate</option>
-                <option>Dental Transitions</option>
-                <option>Business Brokerage</option>
+              <select id="cTeam" className={field} defaultValue="Real Estate">
+                <optgroup label="Menlo Real Estate">
+                  <option>Real Estate</option>
+                </optgroup>
+                <optgroup label="Menlo Business Advisors">
+                  <option>Dental Transitions</option>
+                  <option>Other Businesses</option>
+                </optgroup>
                 <option>Not sure / more than one</option>
               </select>
             </div>

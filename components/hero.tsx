@@ -2,50 +2,31 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
+  BriefcaseIcon,
   BuildingIcon,
   StorefrontIcon,
   ToothIcon,
 } from "@/components/icons";
+import { DIVISIONS, PRACTICES } from "@/lib/divisions";
 import { btnGold, wrap } from "@/lib/styles";
 
-const DIVISIONS = [
-  {
-    num: "01",
-    label: "Real Estate",
-    href: "#real-estate",
-    icon: BuildingIcon,
-    fact: "GREATER PHOENIX",
-    caption: "Industrial, retail, child care and medical/dental office.",
-    img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=72",
-    alt: "Modern commercial office building exterior",
-  },
-  {
-    num: "02",
-    label: "Dental Transitions",
-    href: "#dental",
-    icon: ToothIcon,
-    fact: "NATIONWIDE",
-    caption: "Sales, purchases, certified appraisals and new-practice startups.",
-    img: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1800&q=72",
-    alt: "Modern dental office treatment room",
-  },
-  {
-    num: "03",
-    label: "Business Brokerage",
-    href: "#brokerage",
-    icon: StorefrontIcon,
-    fact: "100% CONFIDENTIAL",
-    caption: "Valuation, confidential sale and post-sale transition planning.",
-    img: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1800&q=72",
-    alt: "Business partners shaking hands after a deal",
-  },
-];
+const DIVISION_ICONS = {
+  "real-estate": BuildingIcon,
+  business: BriefcaseIcon,
+} as const;
+
+const PRACTICE_ICONS = {
+  "real-estate": BuildingIcon,
+  dental: ToothIcon,
+  "business-brokerage": StorefrontIcon,
+} as const;
 
 /** How long each division holds before the hero advances on its own. */
-const AUTOPLAY_MS = 5200;
+const AUTOPLAY_MS = 6000;
 
 export function Hero() {
   const [active, setActive] = useState(0);
@@ -53,7 +34,6 @@ export function Hero() {
   const [autoplay, setAutoplay] = useState(true);
   const [hovered, setHovered] = useState(false);
   const reduceMotion = useReducedMotion();
-  const division = DIVISIONS[active];
   const playing = autoplay && !hovered && !reduceMotion;
 
   useEffect(() => {
@@ -73,7 +53,7 @@ export function Hero() {
       <Backdrop active={active} reduceMotion={!!reduceMotion} />
 
       <div className={`${wrap} relative z-[1] flex flex-1 flex-col`}>
-        <MetaRow division={division} />
+        <MetaRow index={active} />
 
         <div className="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1.15fr_.85fr] lg:gap-16 lg:py-16">
           <Headline reduceMotion={!!reduceMotion} />
@@ -81,7 +61,7 @@ export function Hero() {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
           >
-            <DivisionPanel division={division} />
+            <DivisionPanel index={active} />
           </div>
         </div>
 
@@ -104,7 +84,7 @@ export function Hero() {
 }
 
 /**
- * Full-bleed division photography. All three stay mounted so switching is a
+ * Full-bleed division photography. Both stay mounted so switching is a
  * crossfade of already-decoded images rather than a fresh network request.
  */
 function Backdrop({
@@ -118,7 +98,7 @@ function Backdrop({
     <div aria-hidden="true" className="absolute inset-0 -z-10">
       {DIVISIONS.map((division, i) => (
         <motion.div
-          key={division.href}
+          key={division.id}
           className="absolute inset-0"
           initial={{ opacity: i === 0 ? 1 : 0, scale: 1 }}
           animate={{
@@ -152,7 +132,8 @@ function Backdrop({
   );
 }
 
-function MetaRow({ division }: { division: (typeof DIVISIONS)[number] }) {
+function MetaRow({ index }: { index: number }) {
+  const division = DIVISIONS[index];
   const [time, setTime] = useState<string | null>(null);
 
   useEffect(() => {
@@ -182,14 +163,14 @@ function MetaRow({ division }: { division: (typeof DIVISIONS)[number] }) {
         <span className="hidden sm:inline">Now viewing</span>
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
-            key={division.href}
+            key={division.id}
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.25 }}
             className="text-gold-500"
           >
-            [{division.num}] {division.label}
+            [{division.num}] {division.title}
           </motion.span>
         </AnimatePresence>
       </span>
@@ -218,61 +199,55 @@ function Headline({ reduceMotion }: { reduceMotion: boolean }) {
         className="text-[clamp(2.1rem,5.2vw,4.15rem)] leading-[1.05] tracking-[-0.03em] text-balance text-white sm:leading-[1.01]"
       >
         <span className="mr-3.5 inline-block h-3 w-3 -translate-y-[0.12em] rounded-full bg-gold-500 align-middle" />
-        Three specialties.
+        Two divisions.
         {/* Fixed break only once there is room; below that the text wraps. */}
-        <br className="hidden sm:inline" />{" "}
-        One{" "}
-        <span className="relative inline-block text-gold-500">
-          standard
-          <svg
-            viewBox="0 0 300 22"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-            className="absolute -bottom-[0.11em] left-0 h-[0.3em] w-full overflow-visible"
-          >
-          </svg>
-        </span>{" "}
-        of service.
+        <br className="hidden sm:inline" /> One{" "}
+        <span className="relative inline-block text-gold-500">standard</span> of
+        service.
       </motion.h1>
 
       <motion.p
         variants={item}
-        className="mt-7 max-w-[44ch] text-[1.06rem] leading-[1.6] text-white/75"
+        className="mt-7 max-w-[46ch] text-[1.06rem] leading-[1.6] text-white/75"
       >
-        Commercial real estate, dental practice transitions and business sales —
-        three teams that used to live on separate websites, now working under one
-        roof in Tempe.
+        Commercial real estate on one side. Every business transition on the
+        other — dental practices and every other kind of company — run by
+        specialists who work off the same playbook, out of one office in Tempe.
       </motion.p>
 
-      <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-6">
-        <a href="#contact" className={`${btnGold} group`}>
+      <motion.div
+        variants={item}
+        className="mt-8 flex flex-wrap items-center gap-6"
+      >
+        <Link href="/#contact" className={`${btnGold} group`}>
           Talk to Menlo
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-[3px]" />
-        </a>
-        <a
-          href="#properties"
+        </Link>
+        <Link
+          href="/listings"
           className="font-mono text-[0.78rem] font-semibold tracking-[0.12em] text-gold-500 uppercase transition-colors hover:text-white"
         >
           [ Search listings ]
-        </a>
+        </Link>
       </motion.div>
     </motion.div>
   );
 }
 
 /** The card that used to hold the photo — now a spec panel over the backdrop. */
-function DivisionPanel({ division }: { division: (typeof DIVISIONS)[number] }) {
-  const Icon = division.icon;
+function DivisionPanel({ index }: { index: number }) {
+  const division = DIVISIONS[index];
+  const Icon = DIVISION_ICONS[division.id];
 
   return (
-    <div className="relative overflow-hidden rounded-panel border border-white/15 bg-navy-900/45 p-6 backdrop-blur-md sm:p-7 lg:ml-auto lg:max-w-[400px]">
+    <div className="relative overflow-hidden rounded-panel border border-white/15 bg-navy-900/45 p-6 backdrop-blur-md sm:p-7 lg:ml-auto lg:max-w-[420px]">
       <span
         aria-hidden="true"
         className="absolute inset-y-0 left-0 w-[3px] bg-gold-500"
       />
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
-          key={division.href}
+          key={division.id}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
@@ -281,24 +256,45 @@ function DivisionPanel({ division }: { division: (typeof DIVISIONS)[number] }) {
           <div className="flex items-center gap-3">
             <Icon className="h-6 w-6 shrink-0 text-gold-500" />
             <p className="font-mono text-[0.68rem] font-semibold tracking-[0.14em] text-gold-500">
-              [{division.num}] {division.fact}
+              [{division.num}] {division.reach}
             </p>
           </div>
 
           <p className="mt-4 text-[1.35rem] leading-[1.2] font-semibold text-white">
-            {division.label}
+            {division.title}
           </p>
-          <p className="mt-2.5 max-w-[34ch] text-[0.92rem] leading-[1.55] text-white/70">
-            {division.caption}
+          <p className="mt-2.5 max-w-[36ch] text-[0.92rem] leading-[1.55] text-white/70">
+            {division.tagline}
           </p>
 
-          <a
-            href={division.href}
+          {/* The business division is two practice areas — say so up front. */}
+          <ul className="mt-5 flex flex-col gap-2 border-t border-white/12 pt-4">
+            {division.practices.map((id) => {
+              const practice = PRACTICES[id];
+              const PracticeIcon = PRACTICE_ICONS[id];
+              return (
+                <li
+                  key={id}
+                  className="flex items-center gap-2.5 text-[0.85rem] text-white/75"
+                >
+                  <PracticeIcon className="h-4 w-4 shrink-0 text-gold-500" />
+                  <span className="font-semibold text-white">
+                    {practice.label}
+                  </span>
+                  <span className="text-white/45">·</span>
+                  <span className="truncate">{practice.brand}</span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <Link
+            href={`/#${division.slug}`}
             className="group mt-5 inline-flex items-center gap-2 border-b border-white/25 pb-0.5 text-[0.85rem] font-semibold text-white transition-colors hover:border-gold-500 hover:text-gold-500"
           >
-            Explore {division.label}
+            Explore {division.title}
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[3px]" />
-          </a>
+          </Link>
         </motion.div>
       </AnimatePresence>
     </div>
@@ -319,13 +315,13 @@ function DivisionSelector({
   onHoverEnd: () => void;
 }) {
   return (
-    <div className="grid grid-cols-1 border-t border-white/10 sm:grid-cols-3">
+    <div className="grid grid-cols-1 border-t border-white/10 sm:grid-cols-2">
       {DIVISIONS.map((division, i) => {
-        const Icon = division.icon;
+        const Icon = DIVISION_ICONS[division.id];
         const isActive = active === i;
         return (
           <button
-            key={division.href}
+            key={division.id}
             type="button"
             aria-pressed={isActive}
             onClick={() => onSelect(i)}
@@ -360,7 +356,7 @@ function DivisionSelector({
                 isActive ? "text-gold-500" : "text-white/35"
               }`}
             />
-            <span>
+            <span className="min-w-0">
               <span
                 className={`block font-mono text-[0.66rem] tracking-[0.14em] transition-colors ${
                   isActive ? "text-gold-500" : "text-white/35"
@@ -373,7 +369,12 @@ function DivisionSelector({
                   isActive ? "text-white" : "text-white/60 group-hover:text-white"
                 }`}
               >
-                {division.label}
+                {division.title}
+              </span>
+              <span className="block truncate text-[0.78rem] text-white/40">
+                {division.practices
+                  .map((id) => PRACTICES[id].label)
+                  .join(" · ")}
               </span>
             </span>
           </button>

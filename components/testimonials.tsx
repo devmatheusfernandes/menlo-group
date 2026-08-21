@@ -28,14 +28,14 @@ const QUOTES = [
   {
     quote:
       "What I valued most was the discretion — my employees only found out about the sale once the new owner was already in place.",
-    who: "Business Brokerage client",
+    who: "Other Businesses client",
     detail: "Business sale · Mesa, AZ",
   },
   {
     quote:
       "We needed to buy the location and value an acquisition at the same time — having both under one team saved us weeks.",
     who: "Multi-division client",
-    detail: "Real Estate + Business Brokerage",
+    detail: "Real Estate + Business Advisors",
   },
 ];
 
@@ -60,7 +60,7 @@ export function Testimonials() {
     <section className="overflow-hidden py-24">
       <div className="mx-auto w-full max-w-[1180px] px-5 sm:px-8">
         <Reveal>
-          <Eyebrow>Clients across all three divisions</Eyebrow>
+          <Eyebrow>Clients across both divisions</Eyebrow>
         </Reveal>
         <Reveal delay={0.08}>
           <h2 className={`${sectionHeading} mt-4 mb-11 max-w-[20ch]`}>
@@ -100,7 +100,7 @@ export function Testimonials() {
 
       <p className="mt-8 px-8 text-center text-[0.75rem] text-faint">
         * Illustrative quotes for this presentation — swap in real testimonials
-        from all three divisions before publishing.
+        from both divisions before publishing.
       </p>
     </section>
   );

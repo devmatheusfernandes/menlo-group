@@ -78,3 +78,38 @@
     scroll-behavior: auto;
   }
 }
+
+/* Scroll without the chrome — used inside dialogs and agreement panes. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/*
+ * Modal dialogs render in the browser top layer, so the ::backdrop is the only
+ * way to dim the page — including the fixed header above it.
+ */
+.menlo-dialog::backdrop {
+  background-color: rgb(14 36 56 / 0.6);
+  backdrop-filter: blur(4px);
+  animation: menlo-backdrop-in 0.3s ease-out both;
+}
+
+@keyframes menlo-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menlo-dialog::backdrop {
+    animation: none;
+  }
+}

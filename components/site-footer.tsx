@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   FacebookIcon,
   InstagramIcon,
@@ -10,33 +11,33 @@ const COLUMNS = [
   {
     heading: "Real Estate",
     links: [
-      { label: "About the division", href: "#real-estate" },
-      { label: "Available properties", href: "#properties" },
-      { label: "Talk to a broker", href: "#contact" },
+      { label: "About the division", href: "/#real-estate" },
+      { label: "Available properties", href: "/listings?practice=real-estate" },
+      { label: "Services", href: "/services#real-estate" },
     ],
   },
   {
     heading: "Dental Transitions",
     links: [
-      { label: "About the division", href: "#dental" },
-      { label: "Practices for sale", href: "#properties" },
-      { label: "Request an appraisal", href: "#contact" },
+      { label: "Practices for sale", href: "/listings?practice=dental" },
+      { label: "DSO affiliations", href: "/services#dental" },
+      { label: "Request an appraisal", href: "/#contact" },
     ],
   },
   {
-    heading: "Business Brokerage",
+    heading: "Other Businesses",
     links: [
-      { label: "About the division", href: "#brokerage" },
-      { label: "Businesses for sale", href: "#properties" },
-      { label: "Request a valuation", href: "#contact" },
+      { label: "Businesses for sale", href: "/listings?practice=business-brokerage" },
+      { label: "Services", href: "/services#business-brokerage" },
+      { label: "Request a valuation", href: "/#contact" },
     ],
   },
   {
     heading: "Menlo Group",
     links: [
-      { label: "About us", href: "#about" },
-      { label: "Privacy policy", href: "#top" },
-      { label: "Careers", href: "#contact" },
+      { label: "Our team", href: "/our-team" },
+      { label: "Why Menlo", href: "/why-menlo" },
+      { label: "Contact", href: "/#contact" },
     ],
   },
 ];
@@ -54,14 +55,18 @@ export function SiteFooter() {
         className={`${wrap} grid grid-cols-1 gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)]`}
       >
         <div>
-          <a href="#top" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <LogoMark className="h-[26px] w-5" />
             <span className="font-display text-[1.02rem] font-normal tracking-[0.03em] text-white">
               MENLO <b className="font-bold">GROUP</b>
             </span>
-          </a>
+          </Link>
           <p className="mt-4 max-w-[26ch] text-[0.85rem] text-white/55">
             Illuminating the path to success since 2008.
+          </p>
+          <p className="mt-3 max-w-[28ch] text-[0.8rem] text-white/40">
+            Two divisions — commercial real estate, and business transitions for
+            dental practices and every other company.
           </p>
         </div>
 
@@ -71,13 +76,13 @@ export function SiteFooter() {
               {column.heading}
             </h2>
             {column.links.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="text-[0.86rem] text-white/60 transition-colors hover:text-gold-500"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
         ))}
@@ -91,14 +96,14 @@ export function SiteFooter() {
         </p>
         <div className="flex gap-3.5" aria-label="Social media">
           {SOCIAL.map(({ label, Icon }) => (
-            <a
+            <Link
               key={label}
-              href="#top"
+              href="/"
               aria-label={label}
               className="flex h-[34px] w-[34px] items-center justify-center rounded-full border border-white/20 text-white/70 transition-colors hover:border-gold-500 hover:bg-gold-500 hover:text-navy-900"
             >
               <Icon className="h-[15px] w-[15px]" />
-            </a>
+            </Link>
           ))}
         </div>
       </div>

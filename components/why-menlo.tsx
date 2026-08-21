@@ -1,30 +1,11 @@
+import Link from "next/link";
+import { ArrowRight } from "@/components/icons";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Reveal } from "@/components/ui/reveal";
-import { sectionHeading, wrap } from "@/lib/styles";
+import { btnOutlineDark, btnSm, sectionHeading, wrap } from "@/lib/styles";
+import { PILLARS } from "@/lib/why-menlo";
 
-const CARDS = [
-  {
-    num: "01",
-    title: "Confidentiality first",
-    body: "Employees, patients and customers don't find out about a transition until it makes sense — in real estate, dental practices or businesses.",
-  },
-  {
-    num: "02",
-    title: "Local roots, national reach",
-    body: "We started in Tempe, AZ, and know the Arizona market inside and out — now serving dental transitions clients nationwide.",
-  },
-  {
-    num: "03",
-    title: "One team, three specialties",
-    body: "Need a real estate broker and a business valuation expert on the same deal? It's the same phone call.",
-  },
-  {
-    num: "04",
-    title: "We illuminate the path",
-    body: "Clear processes, realistic timelines and constant communication — from the first conversation to closing day.",
-  },
-];
-
+/** Condensed version of /why-menlo, shown on the landing page. */
 export function WhyMenlo() {
   return (
     <section
@@ -33,29 +14,36 @@ export function WhyMenlo() {
     >
       <div className={wrap}>
         <Reveal>
-          <Eyebrow onDark>What stays the same across all three</Eyebrow>
+          <Eyebrow onDark>What stays the same across both divisions</Eyebrow>
         </Reveal>
-        <Reveal delay={0.08}>
-          <h2 className={`${sectionHeading} mt-4 mb-11 max-w-[20ch] text-white`}>
+        <Reveal
+          delay={0.08}
+          className="mb-11 flex flex-wrap items-end justify-between gap-6"
+        >
+          <h2 className={`${sectionHeading} mt-4 max-w-[20ch] text-white`}>
             The Menlo standard, in every transaction.
           </h2>
+          <Link href="/why-menlo" className={`${btnOutlineDark} ${btnSm} group`}>
+            Why Menlo
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[3px]" />
+          </Link>
         </Reveal>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {CARDS.map((card, i) => (
+          {PILLARS.map((pillar, i) => (
             <Reveal
-              key={card.num}
+              key={pillar.num}
               delay={i * 0.08}
               className="rounded-card border border-white/10 bg-white/4 px-5.5 py-6.5"
             >
               <span className="font-mono text-[0.82rem] font-semibold text-gold-500">
-                {card.num}
+                {pillar.num}
               </span>
               <h3 className="mt-3.5 mb-2.5 font-display text-[1.08rem] font-semibold text-white">
-                {card.title}
+                {pillar.title}
               </h3>
               <p className="text-[0.88rem] leading-[1.55] text-white/65">
-                {card.body}
+                {pillar.body}
               </p>
             </Reveal>
           ))}
